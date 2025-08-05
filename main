@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friends Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 90%;
+            max-width: 1200px;
+            height: 90vh;
+            display: flex;
+        }
+
+        /* Login/Register Screen */
+        .auth-screen {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .auth-form {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .auth-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .auth-switch a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Chat Interface */
+        .chat-app {
+            display: none;
+            width: 100%;
+            flex-direction: row;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-info {
+            padding: 20px;
+            background: #34495e;
+            border-bottom: 1px solid #455a64;
+        }
+
+        .user-info h3 {
+            margin-bottom: 10px;
+        }
+
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .add-friend-section {
+            padding: 15px;
+            border-bottom: 1px solid #455a64;
+        }
+
+        .add-friend-input {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .add-friend-btn {
+            width: 100%;
+            padding: 8px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .friends-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .friend-item {
+            padding: 15px;
+            border-bottom: 1px solid #455a64;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .friend-item:hover {
+            background: #455a64;
+        }
+
+        .friend-item.active {
+            background: #3498db;
+        }
+
+        .friend-name {
+            font-weight: 500;
+        }
+
+        .online-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #27ae60;
+        }
+
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #ecf0f1;
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-header h3 {
+            color: #2c3e50;
+        }
+
+        .messages-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 15px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .message.sent {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message.received {
+            align-self: flex-start;
+            background: white;
+            color: #2c3e50;
+            border: 1px solid #ddd;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .message-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .message-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: #7f8c8d;
+            margin-top: 50px;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .sidebar {
+                width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login/Register Screen -->
+        <div class="auth-screen" id="authScreen">
+            <div class="auth-form">
+                <h2 id="authTitle">Login to Friends Chat</h2>
+                <form id="authForm">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <button type="submit" class="btn" id="authSubmit">Login</button>
+                </form>
+                <div class="auth-switch">
+                    <p>Don't have an account? <a href="#" id="authToggle">Register here</a></p>
+                </div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+        </div>
+
+        <!-- Chat Interface -->
+        <div class="chat-app" id="chatApp">
+            <div class="sidebar">
+                <div class="user-info">
+                    <h3 id="currentUser">Welcome!</h3>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+                
+                <div class="add-friend-section">
+                    <input type="text" class="add-friend-input" id="addFriendInput" placeholder="Enter username to add friend">
+                    <button class="add-friend-btn" onclick="addFriend()">Add Friend</button>
+                </div>
+                
+                <div class="friends-list" id="friendsList">
+                    <!-- Friends will be populated here -->
+                </div>
+            </div>
+            
+            <div class="main-chat">
+                <div class="chat-header">
+                    <h3 id="chatWith">Select a friend to start chatting</h3>
+                </div>
+                
+                <div class="messages-container" id="messagesContainer">
+                    <div class="welcome-message">
+                        <h3>Welcome to Friends Chat!</h3>
+                        <p>Add friends and start chatting</p>
+                    </div>
+                </div>
+                
+                <div class="message-input-container" id="messageInputContainer" style="display: none;">
+                    <input type="text" class="message-input" id="messageInput" placeholder="Type a message...">
+                    <button class="send-btn" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        let currentUser = null;
+        let selectedFriend = null;
+        let isLogin = true;
+        
+        // Mock data storage (in a real app, this would be a backend database)
+        let users = JSON.parse(localStorage.getItem('chatApp_users') || '{}');
+        let friendships = JSON.parse(localStorage.getItem('chatApp_friendships') || '{}');
+        let messages = JSON.parse(localStorage.getItem('chatApp_messages') || '{}');
+
+        // DOM Elements
+        const authScreen = document.getElementById('authScreen');
+        const chatApp = document.getElementById('chatApp');
+        const authForm = document.getElementById('authForm');
+        const authTitle = document.getElementById('authTitle');
+        const authSubmit = document.getElementById('authSubmit');
+        const authToggle = document.getElementById('authToggle');
+        const errorMessage = document.getElementById('errorMessage');
+        const currentUserElement = document.getElementById('currentUser');
+        const friendsList = document.getElementById('friendsList');
+        const messagesContainer = document.getElementById('messagesContainer');
+        const messageInput = document.getElementById('messageInput');
+        const messageInputContainer = document.getElementById('messageInputContainer');
+        const chatWith = document.getElementById('chatWith');
+
+        // Event Listeners
+        authForm.addEventListener('submit', handleAuth);
+        authToggle.addEventListener('click', toggleAuthMode);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Authentication Functions
+        function handleAuth(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showError('Please fill in all fields');
+                return;
+            }
+
+            if (isLogin) {
+                login(username, password);
+            } else {
+                register(username, password);
+            }
+        }
+
+        function login(username, password) {
+            if (!users[username]) {
+                showError('User not found');
+                return;
+            }
+            
+            if (users[username].password !== password) {
+                showError('Invalid password');
+                return;
+            }
+
+            currentUser = username;
+            showChatApp();
+        }
+
+        function register(username, password) {
+            if (users[username]) {
+                showError('Username already exists');
+                return;
+            }
+
+            if (username.length < 3) {
+                showError('Username must be at least 3 characters long');
+                return;
+            }
+
+            if (password.length < 4) {
+                showError('Password must be at least 4 characters long');
+                return;
+            }
+
+            users[username] = {
+                password: password,
+                createdAt: new Date().toISOString()
+            };
+            
+            // Initialize empty friendships array for new user
+            if (!friendships[username]) {
+                friendships[username] = [];
+            }
+            
+            saveData();
+            
+            currentUser = username;
+            showChatApp();
+        }
+
+        function toggleAuthMode(e) {
+            e.preventDefault();
+            isLogin = !isLogin;
+            
+            if (isLogin) {
+                authTitle.textContent = 'Login to Friends Chat';
+                authSubmit.textContent = 'Login';
+                authToggle.innerHTML = 'Don\'t have an account? <a href="#">Register here</a>';
+            } else {
+                authTitle.textContent = 'Register for Friends Chat';
+                authSubmit.textContent = 'Register';
+                authToggle.innerHTML = 'Already have an account? <a href="#">Login here</a>';
+            }
+            
+            clearError();
+        }
+
+        function logout() {
+            currentUser = null;
+            selectedFriend = null;
+            authScreen.style.display = 'flex';
+            chatApp.style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            clearError();
+        }
+
+        function showChatApp() {
+            authScreen.style.display = 'none';
+            chatApp.style.display = 'flex';
+            currentUserElement.textContent = `Hello, ${currentUser}!`;
+            loadFriends();
+            clearError();
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+        }
+
+        function clearError() {
+            errorMessage.textContent = '';
+        }
+
+        // Friends Management
+        function addFriend() {
+            const friendUsername = document.getElementById('addFriendInput').value.trim();
+            
+            if (!friendUsername) {
+                showError('Please enter a username');
+                return;
+            }
+            
+            if (friendUsername === currentUser) {
+                showError('You cannot add yourself as a friend');
+                return;
+            }
+            
+            if (!users[friendUsername]) {
+                showError('User not found');
+                return;
+            }
+            
+            if (friendships[currentUser] && friendships[currentUser].includes(friendUsername)) {
+                showError('Already friends with this user');
+                return;
+            }
+
+            // Initialize friendships array if it doesn't exist
+            if (!friendships[currentUser]) {
+                friendships[currentUser] = [];
+            }
+            if (!friendships[friendUsername]) {
+                friendships[friendUsername] = [];
+            }
+
+            // Add friendship (bidirectional)
+            friendships[currentUser].push(friendUsername);
+            friendships[friendUsername].push(currentUser);
+            
+            saveData();
+            loadFriends();
+            document.getElementById('addFriendInput').value = '';
+            clearError();
+        }
+
+        function loadFriends() {
+            friendsList.innerHTML = '';
+            
+            if (!friendships[currentUser] || friendships[currentUser].length === 0) {
+                friendsList.innerHTML = '<div style="padding: 20px; text-align: center; color: #bdc3c7;">No friends yet. Add some friends to start chatting!</div>';
+                return;
+            }
+
+            friendships[currentUser].forEach(friendUsername => {
+                const friendElement = document.createElement('div');
+                friendElement.className = 'friend-item';
+                friendElement.innerHTML = `
+                    <span class="friend-name">${friendUsername}</span>
+                    <div class="online-indicator"></div>
+                `;
+                friendElement.onclick = () => selectFriend(friendUsername, friendElement);
+                friendsList.appendChild(friendElement);
+            });
+        }
+
+        function selectFriend(friendUsername, element) {
+            selectedFriend = friendUsername;
+            chatWith.textContent = `Chat with ${friendUsername}`;
+            
+            // Update active friend styling
+            document.querySelectorAll('.friend-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            if (element) {
+                element.classList.add('active');
+            }
+            
+            loadMessages();
+            messageInputContainer.style.display = 'flex';
+        }
+
+        // Messaging Functions
+        function loadMessages() {
+            const chatKey = getChatKey(currentUser, selectedFriend);
+            const chatMessages = messages[chatKey] || [];
+            
+            messagesContainer.innerHTML = '';
+            
+            if (chatMessages.length === 0) {
+                messagesContainer.innerHTML = `
+                    <div class="welcome-message">
+                        <h3>Start your conversation with ${selectedFriend}</h3>
+                        <p>Send your first message below!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            chatMessages.forEach(message => {
+                const messageElement = document.createElement('div');
+                messageElement.className = `message ${message.sender === currentUser ? 'sent' : 'received'}`;
+                messageElement.innerHTML = `
+                    <div>${message.text}</div>
+                    <div class="message-time">${formatTime(message.timestamp)}</div>
+                `;
+                messagesContainer.appendChild(messageElement);
+            });
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function sendMessage() {
+            const messageText = messageInput.value.trim();
+            
+            if (!messageText || !selectedFriend) return;
+
+            const chatKey = getChatKey(currentUser, selectedFriend);
+            
+            if (!messages[chatKey]) {
+                messages[chatKey] = [];
+            }
+
+            const message = {
+                sender: currentUser,
+                text: messageText,
+                timestamp: new Date().toISOString()
+            };
+
+            messages[chatKey].push(message);
+            saveData();
+            
+            messageInput.value = '';
+            loadMessages();
+        }
+
+        // H
